@@ -20,6 +20,13 @@ const build = (input: SectionInput[], previous: TodoSection[]): TodoSection[] =>
 
 const open = ($: EngineInterface) => $.ui.open({ id: PANE, title: TITLE })
 
+const asMarkdown = (list: TodoSection[]) =>
+  list.length === 0
+    ? 'No to-dos yet.'
+    : list
+        .map(s => [`**${s.title}**`, ...s.items.map(i => `- [${i.isDone ? 'x' : ' '}] ${i.text}`)].join('\n'))
+        .join('\n\n')
+
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({ name: 'todos', description: 'Open the to-do checklist pane' })
@@ -52,18 +59,25 @@ export const register: Register = on => {
   })
 
   on('command.run', { command: 'todos' }, async $ => {
-    await open($)
+    const opened = await open($)
+    if (opened.isPlaced) return { text: 'To-do pane opened.' }
+    const list = await read($, sections)
 
-    return { text: 'To-do pane opened.' }
+    return {
+      text: `This app can’t show the to-do pane here (${opened.reason}).\n\n${asMarkdown(list)}`,
+    }
   })
 
   on('tool.call', { tool: 'mcp__todo-pane__set_todos' }, async ($, e) => {
     const input = (e as unknown as { sections?: SectionInput[] }).sections ?? []
     await update($, sections, prev => build(input, prev))
-    await open($)
+    const opened = await open($)
     const count = input.reduce((sum, s) => sum + s.items.length, 0)
+    const shown = opened.isPlaced
+      ? 'The pane is showing it.'
+      : `The pane is not visible to the user (${opened.reason}), so also give them the list in your reply.`
 
-    return { result: `Checklist set: ${count} items in ${input.length} sections.` }
+    return { result: `Checklist set: ${count} items in ${input.length} sections. ${shown}` }
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
