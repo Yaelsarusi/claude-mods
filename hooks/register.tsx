@@ -91,11 +91,18 @@ export const register: Register = on => {
           <Box key={s.title} flexDirection="column" marginTop={1}>
             <Text bold>{s.title}</Text>
             {s.items.map(i => (
-              <Button key={i.id} plain onPress={() => toggle(i.id)}>
+              <Box key={`row-${i.id}`} flexDirection="row">
+                <Button
+                  key={i.id}
+                  plain
+                  label={i.isDone ? '☑' : '☐'}
+                  onPress={() => toggle(i.id)}
+                />
                 <Text dimColor={i.isDone} strikethrough={i.isDone}>
-                  {i.isDone ? '☑' : '☐'} {i.text}
+                  {' '}
+                  {i.text}
                 </Text>
-              </Button>
+              </Box>
             ))}
           </Box>
         ))}

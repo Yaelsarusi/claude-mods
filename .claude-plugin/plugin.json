@@ -1,1 +1,1 @@
-{ "name": "todo-pane", "version": "0.1.0", "description": "A pane beside the chat with a tickable checklist of the to-do items Claude gives you", "types": "./types/index.d.ts" }
+{ "name": "todo-pane", "version": "0.2.0", "description": "A pane beside the chat with a tickable checklist of the to-do items Claude gives you", "types": "./types/index.d.ts" }
